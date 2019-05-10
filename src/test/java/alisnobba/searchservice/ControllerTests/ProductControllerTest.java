@@ -55,6 +55,27 @@ public class ProductControllerTest {
 
 
     @Test
+    public void findProductByColor_returnsProductsWithThatColor() throws Exception {
+        //arrange
+        List<Product> products = new ArrayList<>();
+
+        products.add(TestProducts.getProducts().get(3));
+        products.add(TestProducts.getProducts().get(4));
+
+        when(productService.findByBrand("marni")).thenReturn(products);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/products/filter/color/black"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].brand", is("black")))
+                .andExpect(jsonPath("$[1].brand", is("black")));
+
+
+        verify(productService, times(1)).findByColor("black");
+        verifyNoMoreInteractions(productService);
+    }
+
+    @Test
     public void findProductByBrand_returnsProductsWithThatBrand() throws Exception {
         //arrange
         List<Product> products = new ArrayList<>();
@@ -62,9 +83,9 @@ public class ProductControllerTest {
         products.add(TestProducts.getProducts().get(1));
         products.add(TestProducts.getProducts().get(2));
 
-        when(productService.findByBrand("marni")).thenReturn(products);
+        when(productService.findByColor("black")).thenReturn(products);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/products/categories/Men"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/products/filter/brand/black"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].color", is("black")))
@@ -85,7 +106,7 @@ public class ProductControllerTest {
 
         when(productService.findByPriceRange(500.0,1000.0)).thenReturn(products);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/products/brand/black"))
+        mockMvc.perform(MockMvcRequestBuilders.get("products/filter/range/{low}/{high}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(3)));
                 //.andExpect(jsonPath("$[0].price", is("marni")))
